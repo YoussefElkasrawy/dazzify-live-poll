@@ -4,6 +4,10 @@
   "description": "Real-time survey wall for booth visitors at RiseUp Summit",
   "main": "app.js",
   "scripts": {
+    "list": "pm2 list",
+    "log": "pm2 logs dazzify-poll",
+    "kill": "pm2 delete dazzify-poll",
+    "start:prod": "pm2 delete dazzify-poll; pm2 start app.js --name dazzify-poll",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
