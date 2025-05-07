@@ -230,6 +230,11 @@
             opacity: 1;
             font-weight: 700;
             color: var(--primary);
+            animation: countUp 1.5s ease-out forwards;
+        }
+        @keyframes countUp {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
         .navigation {
             text-align: center;
@@ -657,6 +662,13 @@
                     questionCard.classList.add('show-percent');
                     questionCard.classList.add('locked');
                     buttons.forEach(btn => { btn.disabled = true; });
+                    
+                    // Animate percentages
+                    const percentValues = questionCard.querySelectorAll('.percent-value');
+                    percentValues.forEach(percentEl => {
+                        const targetValue = parseFloat(percentEl.textContent);
+                        animateCounter(percentEl, 0, targetValue);
+                    });
                 }
                 state.answeredQuestions.add(questionKey);
                 // Emit vote to server
@@ -669,6 +681,26 @@
             } finally {
                 state.isSubmitting = false;
             }
+        }
+
+        function animateCounter(element, start, end) {
+            let startTime = null;
+            const duration = 1500;
+            
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const currentValue = Math.floor(progress * (end - start) + start);
+                element.textContent = `${currentValue}%`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    element.textContent = `${end}%`;
+                }
+            }
+            
+            requestAnimationFrame(animate);
         }
 
         function updateContinueButton() {
