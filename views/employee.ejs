@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1><%= title %></h1>
+        <div class="questions-container">
+            <% questions.forEach((question, index) => { %>
+                <div class="question-card" id="question-<%= question.key %>">
+                    <h2><%= question.text %></h2>
+                    <div class="options-grid">
+                        <% question.options.forEach((option, optIndex) => { %>
+                            <button class="option-btn" 
+                                    data-question-key="<%= question.key %>" 
+                                    data-option-key="<%= option.key %>"
+                                    onclick="vote('<%= question.key %>', '<%= option.key %>')">
+                                <span class="option-text"><%= option.text %></span>
+                                <div class="percent-display">
+                                    <div class="percent-bar">
+                                        <div class="percent-bar-fill" style="width: <%= percentages[question.key] ? percentages[question.key][optIndex] : 0 %>%"></div>
+                                    </div>
+                                    <span class="percent-value"><%= percentages[question.key] ? percentages[question.key][optIndex] : 0 %>%</span>
+                                </div>
+                            </button>
+                        <% }); %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+        <div class="navigation">
+            <button class="continue-btn" onclick="continueToNext()" disabled>Continue</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // State management
+        const state = {
+            answeredQuestions: new Set(),
+            totalQuestions: <%= questions.length %>,
+            isSubmitting: false
+        };
+
+        // Vote handling
+        function vote(questionKey, optionKey) {
+            if (state.isSubmitting) return;
+            try {
+                state.isSubmitting = true;
+                const questionCard = document.getElementById(`question-${questionKey}`);
+                if (!questionCard) throw new Error(`Question card ${questionKey} not found`);
+                const buttons = questionCard.querySelectorAll('.option-btn');
+                if (!buttons.length) throw new Error(`No buttons found for question ${questionKey}`);
+                buttons.forEach(btn => btn.classList.remove('answered'));
+                const selectedBtn = Array.from(buttons).find(btn => btn.getAttribute('data-option-key') === optionKey);
+                if (selectedBtn) selectedBtn.classList.add('answered');
+                if (questionCard) {
+                    questionCard.classList.add('show-percent');
+                    buttons.forEach(btn => { btn.disabled = true; });
+                    questionCard.classList.add('locked');
+                }
+                state.answeredQuestions.add(questionKey);
+                // Emit vote to server
+                const socket = window.io();
+                socket.emit('vote', { questionKey, optionKey, isEmployee: true });
+                updateContinueButton();
+            } catch (error) {
+                alert('An error occurred while submitting your vote. Please try again.');
+            } finally {
+                state.isSubmitting = false;
+            }
+        }
+
+        function updateContinueButton() {
+            const continueBtn = document.querySelector('.continue-btn');
+            if (continueBtn) {
+                continueBtn.disabled = state.answeredQuestions.size !== state.totalQuestions;
+            }
+        }
+
+        function continueToNext() {
+            if (state.answeredQuestions.size !== state.totalQuestions) return;
+            window.location.href = '/thankyou';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateContinueButton();
+        });
+    </script>
+</body>
+</html> 
