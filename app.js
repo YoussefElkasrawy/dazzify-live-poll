@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const fs = require('fs');
 const connectDB = require('./config/db');
 const indexRoutes = require('./routes/index');
 const employeeRoutes = require('./routes/employee');
