@@ -486,6 +486,86 @@
             cursor: not-allowed;
         }
         
+        /* Progress Indicator */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .progress-status {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .progress-status-highlight {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .progress-bar-container {
+            height: 8px;
+            width: 100%;
+            background: #eaeaea;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            border-radius: 10px;
+            transition: width 0.5s cubic-bezier(0.44, 0.05, 0.55, 0.95);
+            position: relative;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.3) 50%, 
+                rgba(255,255,255,0) 100%);
+            animation: shine-progress 2s infinite;
+            opacity: 0.6;
+        }
+        
+        @keyframes shine-progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .progress-bar.completed {
+            animation: pulse-complete 1.5s infinite alternate;
+        }
+        
+        @keyframes pulse-complete {
+            0% { background: linear-gradient(90deg, var(--accent), var(--primary)); }
+            100% { background: linear-gradient(90deg, var(--primary), var(--accent)); }
+        }
+        
         /* Download App Section */
         .download-app-section {
             background: var(--card-bg);
@@ -568,6 +648,19 @@
             .page-title {
                 font-size: 1.8rem;
                 margin-bottom: 1.2rem;
+            }
+            .progress-container {
+                padding: 0.8rem;
+                margin-bottom: 1.2rem;
+            }
+            .progress-info {
+                margin-bottom: 0.4rem;
+            }
+            .progress-label, .progress-status {
+                font-size: 0.8rem;
+            }
+            .progress-bar-container {
+                height: 6px;
             }
             .options-grid {
                 grid-template-columns: 1fr;
@@ -658,6 +751,18 @@
     
     <div class="container">
         <h1 class="page-title"><%= title %></h1>
+        
+        <!-- Progress Indicator -->
+        <div class="progress-container">
+            <div class="progress-info">
+                <span class="progress-label">Your Progress:</span>
+                <span class="progress-status"><span id="answered-count" class="progress-status-highlight">0</span> of <%= questions.length %> questions</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+        
         <div class="questions-container">
             <% questions.forEach((question, index) => { %>
                 <div class="question-card" id="question-<%= question.key %>">
@@ -840,6 +945,34 @@
             if (continueBtn) {
                 continueBtn.disabled = state.answeredQuestions.size !== state.totalQuestions;
             }
+            
+            // Update progress indicator
+            updateProgressIndicator();
+        }
+        
+        function updateProgressIndicator() {
+            const answeredCount = state.answeredQuestions.size;
+            const totalQuestions = state.totalQuestions;
+            const progressPercentage = (answeredCount / totalQuestions) * 100;
+            
+            // Update counter
+            const countElement = document.getElementById('answered-count');
+            if (countElement) {
+                countElement.textContent = answeredCount;
+            }
+            
+            // Update progress bar
+            const progressBar = document.getElementById('progress-bar');
+            if (progressBar) {
+                progressBar.style.width = `${progressPercentage}%`;
+                
+                // Add celebration effect when complete
+                if (progressPercentage >= 100) {
+                    progressBar.classList.add('completed');
+                } else {
+                    progressBar.classList.remove('completed');
+                }
+            }
         }
 
         function continueToNext() {
@@ -849,6 +982,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             updateContinueButton();
+            
+            // Initialize progress indicator
+            updateProgressIndicator();
             
             // Listen for vote updates from other users
             socket.on('voteUpdate', (data) => {

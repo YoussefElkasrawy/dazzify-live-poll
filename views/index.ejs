@@ -618,6 +618,19 @@
                 font-size: 1.8rem;
                 margin-bottom: 1.2rem;
             }
+            .progress-container {
+                padding: 0.8rem;
+                margin-bottom: 1.2rem;
+            }
+            .progress-info {
+                margin-bottom: 0.4rem;
+            }
+            .progress-label, .progress-status {
+                font-size: 0.8rem;
+            }
+            .progress-bar-container {
+                height: 6px;
+            }
             .options-grid {
                 grid-template-columns: 1fr;
                 gap: 0.8rem;
@@ -807,6 +820,14 @@
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
+        .progress-bar.completed {
+            animation: pulse-complete 1.5s infinite alternate;
+        }
+        
+        @keyframes pulse-complete {
+            0% { background: linear-gradient(90deg, var(--accent), var(--primary)); }
+            100% { background: linear-gradient(90deg, var(--primary), var(--accent)); }
+        }
     </style>
 </head>
 <body>
@@ -824,6 +845,18 @@
     
     <div class="container">
         <h1 class="page-title"><%= title %></h1>
+        
+        <!-- Progress Indicator -->
+        <div class="progress-container">
+            <div class="progress-info">
+                <span class="progress-label">Your Progress:</span>
+                <span class="progress-status"><span id="answered-count" class="progress-status-highlight">0</span> of <%= questions.length %> questions</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+        
         <div class="questions-container">
             <% questions.forEach((question, index) => { %>
                 <div class="question-card" id="question-<%= question.key %>">
@@ -899,17 +932,6 @@
                 </div>
             </div>
         </section>
-        
-        <!-- Progress Indicator -->
-        <div class="progress-container">
-            <div class="progress-info">
-                <span class="progress-label">Questions Remaining:</span>
-                <span class="progress-status"><span class="progress-status-highlight">0</span> out of <%= questions.length %></span>
-            </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar"></div>
-            </div>
-        </div>
     </div>
     
     <!-- Employee Check Modal -->
@@ -1041,6 +1063,34 @@
             if (continueBtn) {
                 continueBtn.disabled = state.answeredQuestions.size !== state.totalQuestions;
             }
+            
+            // Update progress indicator
+            updateProgressIndicator();
+        }
+        
+        function updateProgressIndicator() {
+            const answeredCount = state.answeredQuestions.size;
+            const totalQuestions = state.totalQuestions;
+            const progressPercentage = (answeredCount / totalQuestions) * 100;
+            
+            // Update counter
+            const countElement = document.getElementById('answered-count');
+            if (countElement) {
+                countElement.textContent = answeredCount;
+            }
+            
+            // Update progress bar
+            const progressBar = document.getElementById('progress-bar');
+            if (progressBar) {
+                progressBar.style.width = `${progressPercentage}%`;
+                
+                // Add celebration effect when complete
+                if (progressPercentage >= 100) {
+                    progressBar.classList.add('completed');
+                } else {
+                    progressBar.classList.remove('completed');
+                }
+            }
         }
 
         function checkEmployeeStatus() {
@@ -1058,6 +1108,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             updateContinueButton();
+            
+            // Initialize progress indicator
+            updateProgressIndicator();
             
             // Listen for vote updates from other users
             socket.on('voteUpdate', (data) => {
