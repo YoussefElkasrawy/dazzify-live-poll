@@ -14,9 +14,9 @@ let server
 if (process.env.NODE_ENV === 'production') {
     server = require('http').createServer(
         {
-            key: fs.readFileSync(`/etc/letsencrypt/live/poll.${Config.API_DOMAIN}/privkey.pem`),
+            key: fs.readFileSync(`/etc/letsencrypt/live/poll.${process.env.DOMAIN}/privkey.pem`),
             cert: fs.readFileSync(
-                `/etc/letsencrypt/live/poll.${Config.API_DOMAIN}/fullchain.pem`,
+                `/etc/letsencrypt/live/poll.${process.env.DOMAIN}/fullchain.pem`,
             ),
         },
         app,
