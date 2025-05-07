@@ -250,6 +250,26 @@
             transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             transform-origin: left;
             animation: fill-bar 1.5s ease-out forwards;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Visual indicator for real-time updates */
+        .summary-percent-bar.updating::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.4);
+            animation: pulse-update 1s ease-in-out;
+            pointer-events: none;
+        }
+        
+        @keyframes pulse-update {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
         }
         .options-grid {
             display: grid;
@@ -717,6 +737,9 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // Initialize socket connection
+        const socket = window.io();
+        
         // State management
         const state = {
             answeredQuestions: new Set(),
@@ -767,7 +790,6 @@
                 }
                 state.answeredQuestions.add(questionKey);
                 // Emit vote to server
-                const socket = window.io();
                 socket.emit('vote', { questionKey, optionKey, isEmployee: true });
                 updateContinueButton();
             } catch (error) {
@@ -827,7 +849,77 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             updateContinueButton();
+            
+            // Listen for vote updates from other users
+            socket.on('voteUpdate', (data) => {
+                console.log('Received vote update:', data);
+                const { questionKey, percentages } = data;
+                updateQuestionPercentages(questionKey, percentages);
+            });
         });
+        
+        // Update percentages in real-time when other users vote
+        function updateQuestionPercentages(questionKey, newPercentages) {
+            const questionCard = document.getElementById(`question-${questionKey}`);
+            if (!questionCard) return;
+            
+            // Only update if the question has already been answered by this user
+            if (!questionCard.classList.contains('show-percent')) return;
+            
+            console.log(`Updating question ${questionKey} with new percentages:`, newPercentages);
+            
+            // Update summary bars
+            const summaryBars = questionCard.querySelectorAll('.summary-percent-bar');
+            summaryBars.forEach((bar, index) => {
+                const percent = newPercentages[index] || 0;
+                // Update data attribute for future animations
+                bar.setAttribute('data-target-width', `${percent}%`);
+                
+                // Add updating visual indicator
+                bar.classList.add('updating');
+                setTimeout(() => {
+                    bar.classList.remove('updating');
+                }, 1000);
+                
+                // Smoothly animate to new width
+                bar.style.width = `${percent}%`;
+            });
+            
+            // Update legend percentages
+            const legendPercentages = questionCard.querySelectorAll('.legend-percent');
+            legendPercentages.forEach((percentEl, index) => {
+                const percent = newPercentages[index] || 0;
+                const currentPercent = parseInt(percentEl.textContent);
+                
+                // Only animate if there's a meaningful change
+                if (Math.abs(currentPercent - percent) > 1) {
+                    // Update data attribute
+                    percentEl.setAttribute('data-percent', percent);
+                    // Animate to new value
+                    animateCounter(percentEl, currentPercent, percent);
+                }
+            });
+            
+            // Update option button percentages if they exist
+            const options = questionCard.querySelectorAll('.option-btn');
+            options.forEach((option, index) => {
+                const percentValue = option.querySelector('.percent-value');
+                if (percentValue) {
+                    const percent = newPercentages[index] || 0;
+                    const currentPercent = parseInt(percentValue.textContent);
+                    
+                    if (Math.abs(currentPercent - percent) > 1) {
+                        animateCounter(percentValue, currentPercent, percent);
+                    }
+                }
+                
+                const percentBar = option.querySelector('.percent-bar-fill');
+                if (percentBar) {
+                    const percent = newPercentages[index] || 0;
+                    percentBar.style.width = `${percent}%`;
+                }
+            });
+        }
     </script>
 </body>
 </html> 
