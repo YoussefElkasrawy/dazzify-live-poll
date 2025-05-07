@@ -3,13 +3,563 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title><%= title %> | Dazzify</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
+    <style>
+        :root {
+            --primary: #4B108D;
+            --accent: #3ed6a7;
+            --bg: #f8f9fa;
+            --card-bg: #fff;
+            --shadow: 0 4px 24px rgba(75, 16, 141, 0.07);
+            --shadow-sm: 0 2px 8px rgba(75, 16, 141, 0.07);
+        }
+        body {
+            background: var(--bg);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            min-height: 100vh;
+            position: relative;
+        }
+        .header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 0;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        .shapes-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .brand-shape {
+            position: absolute;
+            filter: blur(30px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+        .shape-top-left {
+            width: 300px;
+            height: 300px;
+            top: -120px;
+            left: -120px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: float-tl 20s ease-in-out infinite alternate, pulse 15s ease-in-out infinite;
+        }
+        .shape-top-right {
+            width: 200px;
+            height: 200px;
+            top: -80px;
+            right: -80px;
+            background: var(--accent);
+            border-radius: 40%;
+            animation: float-tr 18s ease-in-out infinite alternate-reverse, pulse 12s ease-in-out infinite;
+        }
+        .shape-bottom-left {
+            width: 250px;
+            height: 250px;
+            bottom: -100px;
+            left: -100px;
+            background: var(--accent);
+            border-radius: 30% 70% 50% 40%;
+            animation: float-bl 25s ease-in-out infinite alternate, morph 15s ease-in-out infinite;
+        }
+        .shape-bottom-right {
+            width: 350px;
+            height: 350px;
+            bottom: -150px;
+            right: -150px;
+            background: var(--primary);
+            border-radius: 60% 40% 30% 70%;
+            animation: float-br 22s ease-in-out infinite alternate-reverse, morph 18s ease-in-out infinite;
+        }
+        .shape-center {
+            width: 180px;
+            height: 180px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            opacity: 0.1;
+            animation: morph 15s ease-in-out infinite, float-center 25s ease-in-out infinite;
+        }
+        .page-title {
+            text-align: center;
+            color: var(--primary);
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .questions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 16px rgba(75, 16, 141, 0.05);
+            padding: 1.8rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(75, 16, 141, 0.03);
+        }
+        .question-card.locked {
+            border-left: 3px solid var(--accent);
+        }
+        .question-card h2 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+        .option-btn {
+            background: #fff;
+            color: #444;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 400;
+            font-family: 'Poppins', sans-serif;
+            text-align: left;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        .option-btn:hover {
+            border-color: rgba(75, 16, 141, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(75, 16, 141, 0.06);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 15px rgba(75, 16, 141, 0.06); }
+            50% { box-shadow: 0 4px 20px rgba(75, 16, 141, 0.15); }
+            100% { box-shadow: 0 4px 15px rgba(75, 16, 141, 0.06); }
+        }
+        .option-btn.answered {
+            background: rgba(75, 16, 141, 0.03);
+            color: var(--primary);
+            border-color: rgba(75, 16, 141, 0.1);
+            font-weight: 500;
+            animation: selected 0.5s ease;
+        }
+        @keyframes selected {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        .option-btn:disabled {
+            cursor: default;
+            transform: none;
+        }
+        .option-text {
+            font-weight: 500;
+            margin-bottom: 1.2rem;
+            line-height: 1.4;
+        }
+        .percent-display {
+            width: 100%;
+        }
+        .percent-bar {
+            background: #f0f0f0;
+            border-radius: 20px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .percent-bar-fill {
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            height: 100%;
+            border-radius: 20px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 5px;
+        }
+        .question-card.show-percent .percent-bar-fill {
+            animation: fill-bar 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes fill-bar {
+            from { width: 0%; }
+        }
+        .percent-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0.85;
+            display: inline-block;
+        }
+        .question-card.show-percent .percent-value {
+            opacity: 1;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .navigation {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem 0;
+        }
+        .continue-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .continue-btn:hover:not(:disabled) {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            animation: pulse-btn 1.5s infinite;
+        }
+        @keyframes pulse-btn {
+            0% { box-shadow: 0 4px 15px rgba(75, 16, 141, 0.1); }
+            50% { box-shadow: 0 4px 20px rgba(75, 16, 141, 0.2); }
+            100% { box-shadow: 0 4px 15px rgba(75, 16, 141, 0.1); }
+        }
+        .continue-btn:disabled {
+            background: #b9b9b9;
+            cursor: not-allowed;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(75, 16, 141, 0.07);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow);
+            max-width: 450px;
+            width: 90%;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            animation: modal-in 0.3s ease-out;
+        }
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+        .modal-icon {
+            font-size: 3rem;
+            margin: 0.5rem 0;
+            animation: wave 2s infinite;
+        }
+        @keyframes wave {
+            0% { transform: rotate(0deg); }
+            10% { transform: rotate(14deg); }
+            20% { transform: rotate(-8deg); }
+            30% { transform: rotate(14deg); }
+            40% { transform: rotate(-4deg); }
+            50% { transform: rotate(10deg); }
+            60% { transform: rotate(0deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .modal h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+        .modal p {
+            color: #444;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+        .modal-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .modal-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 1rem 1.8rem;
+            min-width: 180px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .modal-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+        .modal-btn.no-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .modal-btn.no-btn:hover {
+            background: rgba(75, 16, 141, 0.1);
+        }
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+        .modal-note {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        /* Download App Section */
+        .download-app-section {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow);
+            margin: 3rem auto;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        .download-content {
+            position: relative;
+            z-index: 2;
+        }
+        .download-content h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        .download-content p {
+            color: #444;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+        .download-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .download-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        .download-badge:hover {
+            transform: translateY(-5px);
+        }
+        .badge-img {
+            height: 54px;
+            border-radius: 0.5rem;
+        }
+        .download-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .download-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.07;
+        }
+        .shape-dl-1 {
+            bottom: -70px;
+            right: -70px;
+            width: 240px;
+            height: 240px;
+        }
+        .shape-dl-2 {
+            top: -60px;
+            left: -60px;
+            width: 180px;
+            height: 180px;
+            background: var(--primary);
+            opacity: 0.05;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 700px) {
+            .page-title {
+                font-size: 1.8rem;
+                margin-bottom: 1.2rem;
+            }
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            .question-card {
+                padding: 1.3rem 1rem;
+                margin-bottom: 1.2rem;
+            }
+            .question-card h2 {
+                font-size: 1.1rem;
+                margin-bottom: 1.2rem;
+            }
+            .option-btn {
+                padding: 1rem 1.2rem;
+            }
+            .option-text {
+                margin-bottom: 1rem;
+            }
+            .download-app-section {
+                padding: 2rem 1rem;
+            }
+            .download-content h2 {
+                font-size: 1.5rem;
+            }
+            .modal-content {
+                padding: 1.5rem 1rem;
+            }
+            .modal-btn {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+        @media (max-width: 480px) {
+            .question-card {
+                padding: 1.1rem 0.8rem;
+                margin-bottom: 1rem;
+                border-radius: 0.8rem;
+            }
+            .option-btn {
+                padding: 0.9rem 1rem;
+                border-radius: 8px;
+            }
+            .option-text {
+                font-size: 0.95rem;
+                margin-bottom: 0.8rem;
+            }
+            .percent-bar {
+                height: 6px;
+                margin-bottom: 0.3rem;
+            }
+            .percent-value {
+                font-size: 0.8rem;
+            }
+            .continue-btn {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+            .badge-img {
+                height: 45px;
+            }
+        }
+        @keyframes float-tl {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 80px); }
+        }
+        @keyframes float-tr {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-80px, 120px); }
+        }
+        @keyframes float-bl {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(120px, -100px); }
+        }
+        @keyframes float-br {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100px, -80px); }
+        }
+        @keyframes float-center {
+            0% { transform: translate(-50%, -50%); }
+            25% { transform: translate(-40%, -60%); }
+            50% { transform: translate(-60%, -40%); }
+            75% { transform: translate(-60%, -60%); }
+            100% { transform: translate(-50%, -50%); }
+        }
+        @keyframes morph {
+            0% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            25% { border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%; }
+            50% { border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; }
+            75% { border-radius: 60% 40% 40% 60% / 40% 60% 40% 60%; }
+            100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+        }
+    </style>
 </head>
 <body>
+    <div class="shapes-container">
+        <div class="brand-shape shape-top-left"></div>
+        <div class="brand-shape shape-top-right"></div>
+        <div class="brand-shape shape-bottom-left"></div>
+        <div class="brand-shape shape-bottom-right"></div>
+        <div class="brand-shape shape-center"></div>
+    </div>
+    
+    <header class="header">
+        <div class="logo">dazzify</div>
+    </header>
+    
     <div class="container">
-        <h1><%= title %></h1>
+        <h1 class="page-title"><%= title %></h1>
         <div class="questions-container">
             <% questions.forEach((question, index) => { %>
                 <div class="question-card" id="question-<%= question.key %>">
@@ -36,14 +586,34 @@
         <div class="navigation">
             <button class="continue-btn" onclick="checkEmployeeStatus()" disabled>Continue</button>
         </div>
+        
+        <!-- Download App Section -->
+        <section class="download-app-section">
+            <div class="download-bg">
+                <div class="download-shape shape-dl-1"></div>
+                <div class="download-shape shape-dl-2"></div>
+            </div>
+            <div class="download-content">
+                <h2>Get Dazzify on Your Phone</h2>
+                <p>Set up your event with only a few clicks!</p>
+                <div class="download-badges">
+                    <a href="https://play.google.com/store/apps/details?id=com.dazzify.app" target="_blank" class="download-badge">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="badge-img" />
+                    </a>
+                    <a href="https://apps.apple.com/eg/app/dazzify/id6670177355" target="_blank" class="download-badge">
+                        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" class="badge-img" />
+                    </a>
+                </div>
+            </div>
+        </section>
     </div>
-
+    
     <!-- Employee Check Modal -->
     <div id="employeeModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>One Last Question!</h2>
                 <div class="modal-icon">👋</div>
+                <h2>One Last Question!</h2>
             </div>
             <p>Are you an employee or work in an events/marketing team?</p>
             <div class="modal-buttons">
@@ -85,8 +655,8 @@
                 if (selectedBtn) selectedBtn.classList.add('answered');
                 if (questionCard) {
                     questionCard.classList.add('show-percent');
-                    buttons.forEach(btn => { btn.disabled = true; });
                     questionCard.classList.add('locked');
+                    buttons.forEach(btn => { btn.disabled = true; });
                 }
                 state.answeredQuestions.add(questionKey);
                 // Emit vote to server
@@ -95,6 +665,7 @@
                 updateContinueButton();
             } catch (error) {
                 alert('An error occurred while submitting your vote. Please try again.');
+                console.error(error);
             } finally {
                 state.isSubmitting = false;
             }
@@ -124,166 +695,5 @@
             updateContinueButton();
         });
     </script>
-
-    <style>
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 16px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            animation: modalFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-icon {
-            font-size: 3rem;
-            margin: 1rem 0;
-            animation: wave 2s infinite;
-        }
-
-        .modal h2 {
-            color: #4B108D;
-            margin-bottom: 0.5rem;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .modal p {
-            margin-bottom: 2rem;
-            color: #333;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-btn {
-            padding: 1rem 1.8rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-size: 1rem;
-            min-width: 200px;
-        }
-
-        .btn-icon {
-            font-size: 1.2rem;
-        }
-
-        .yes-btn {
-            background: #4B108D;
-            color: white;
-            box-shadow: 0 4px 12px rgba(75, 16, 141, 0.2);
-        }
-
-        .no-btn {
-            background: #f8f9fa;
-            color: #4B108D;
-            border: 2px solid #4B108D;
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .yes-btn:hover {
-            background: #3a0d6b;
-            box-shadow: 0 6px 16px rgba(75, 16, 141, 0.3);
-        }
-
-        .no-btn:hover {
-            background: #f0f0f0;
-            border-color: #3a0d6b;
-            color: #3a0d6b;
-        }
-
-        .modal-footer {
-            margin-top: 1rem;
-        }
-
-        .modal-note {
-            font-size: 0.9rem;
-            color: #666;
-            margin: 0;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes wave {
-            0% { transform: rotate(0deg); }
-            10% { transform: rotate(14deg); }
-            20% { transform: rotate(-8deg); }
-            30% { transform: rotate(14deg); }
-            40% { transform: rotate(-4deg); }
-            50% { transform: rotate(10deg); }
-            60% { transform: rotate(0deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        @media (max-width: 480px) {
-            .modal-buttons {
-                flex-direction: column;
-            }
-            
-            .modal-content {
-                padding: 1.5rem;
-            }
-
-            .modal-btn {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .modal h2 {
-                font-size: 1.5rem;
-            }
-
-            .modal p {
-                font-size: 1rem;
-            }
-        }
-    </style>
 </body>
 </html> 

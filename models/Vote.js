@@ -4,8 +4,6 @@ const voteSchema = new mongoose.Schema({
     questionKey: { type: String, required: true, index: true },
     optionKey: { type: String, required: true },
     isEmployee: { type: Boolean, required: true, index: true },
-    questionText: { type: String, required: true },
-    optionText: { type: String, required: true },
     timestamp: { type: Date, default: Date.now, index: true }
 });
 

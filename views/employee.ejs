@@ -3,13 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title><%= title %> | Dazzify</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
+    <style>
+        :root {
+            --primary: #4B108D;
+            --accent: #3ed6a7;
+            --bg: #f8f9fa;
+            --card-bg: #fff;
+            --shadow: 0 4px 24px rgba(75, 16, 141, 0.07);
+            --shadow-sm: 0 2px 8px rgba(75, 16, 141, 0.07);
+        }
+        body {
+            background: var(--bg);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            min-height: 100vh;
+            position: relative;
+        }
+        .header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 0;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        .shapes-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .brand-shape {
+            position: absolute;
+            filter: blur(30px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+        .shape-top-left {
+            width: 300px;
+            height: 300px;
+            top: -120px;
+            left: -120px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: float-tl 20s ease-in-out infinite alternate, pulse 15s ease-in-out infinite;
+        }
+        .shape-top-right {
+            width: 200px;
+            height: 200px;
+            top: -80px;
+            right: -80px;
+            background: var(--accent);
+            border-radius: 40%;
+            animation: float-tr 18s ease-in-out infinite alternate-reverse, pulse 12s ease-in-out infinite;
+        }
+        .shape-bottom-left {
+            width: 250px;
+            height: 250px;
+            bottom: -100px;
+            left: -100px;
+            background: var(--accent);
+            border-radius: 30% 70% 50% 40%;
+            animation: float-bl 25s ease-in-out infinite alternate, morph 15s ease-in-out infinite;
+        }
+        .shape-bottom-right {
+            width: 350px;
+            height: 350px;
+            bottom: -150px;
+            right: -150px;
+            background: var(--primary);
+            border-radius: 60% 40% 30% 70%;
+            animation: float-br 22s ease-in-out infinite alternate-reverse, morph 18s ease-in-out infinite;
+        }
+        .shape-center {
+            width: 180px;
+            height: 180px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            opacity: 0.1;
+            animation: morph 15s ease-in-out infinite, float-center 25s ease-in-out infinite;
+        }
+        @keyframes float-tl {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 80px); }
+        }
+        @keyframes float-tr {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-80px, 120px); }
+        }
+        @keyframes float-bl {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(120px, -100px); }
+        }
+        @keyframes float-br {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100px, -80px); }
+        }
+        @keyframes float-center {
+            0% { transform: translate(-50%, -50%); }
+            25% { transform: translate(-40%, -60%); }
+            50% { transform: translate(-60%, -40%); }
+            75% { transform: translate(-60%, -60%); }
+            100% { transform: translate(-50%, -50%); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes morph {
+            0% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            25% { border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%; }
+            50% { border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; }
+            75% { border-radius: 60% 40% 40% 60% / 40% 60% 40% 60%; }
+            100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+        }
+        .page-title {
+            text-align: center;
+            color: var(--primary);
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .questions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 16px rgba(75, 16, 141, 0.05);
+            padding: 1.8rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(75, 16, 141, 0.03);
+        }
+        .question-card.locked {
+            border-left: 3px solid var(--accent);
+        }
+        .question-card h2 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+        .option-btn {
+            background: #fff;
+            color: #444;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 400;
+            font-family: 'Poppins', sans-serif;
+            text-align: left;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        .option-btn:hover {
+            border-color: rgba(75, 16, 141, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(75, 16, 141, 0.06);
+            animation: pulse 1s infinite;
+        }
+        .option-btn.answered {
+            background: rgba(75, 16, 141, 0.03);
+            color: var(--primary);
+            border-color: rgba(75, 16, 141, 0.1);
+            font-weight: 500;
+            animation: selected 0.5s ease;
+        }
+        @keyframes selected {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        .option-btn:disabled {
+            cursor: default;
+            transform: none;
+        }
+        .option-text {
+            font-weight: 500;
+            margin-bottom: 1.2rem;
+            line-height: 1.4;
+        }
+        .percent-display {
+            width: 100%;
+        }
+        .percent-bar {
+            background: #f0f0f0;
+            border-radius: 20px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .percent-bar-fill {
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            height: 100%;
+            border-radius: 20px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 5px;
+        }
+        .question-card.show-percent .percent-bar-fill {
+            animation: fill-bar 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes fill-bar {
+            from { width: 0%; }
+        }
+        .percent-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0.85;
+            display: inline-block;
+        }
+        .question-card.show-percent .percent-value {
+            opacity: 1;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .navigation {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem 0;
+        }
+        .continue-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .continue-btn:hover:not(:disabled) {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            animation: pulse-btn 1.5s infinite;
+        }
+        .continue-btn:disabled {
+            background: #b9b9b9;
+            cursor: not-allowed;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 700px) {
+            .page-title {
+                font-size: 1.8rem;
+                margin-bottom: 1.2rem;
+            }
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            .question-card {
+                padding: 1.3rem 1rem;
+                margin-bottom: 1.2rem;
+            }
+            .question-card h2 {
+                font-size: 1.1rem;
+                margin-bottom: 1.2rem;
+            }
+            .option-btn {
+                padding: 1rem 1.2rem;
+            }
+            .option-text {
+                margin-bottom: 1rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .question-card {
+                padding: 1.1rem 0.8rem;
+                margin-bottom: 1rem;
+                border-radius: 0.8rem;
+            }
+            .option-btn {
+                padding: 0.9rem 1rem;
+                border-radius: 8px;
+            }
+            .option-text {
+                font-size: 0.95rem;
+                margin-bottom: 0.8rem;
+            }
+            .percent-bar {
+                height: 6px;
+                margin-bottom: 0.3rem;
+            }
+            .percent-value {
+                font-size: 0.8rem;
+            }
+            .continue-btn {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="shapes-container">
+        <div class="brand-shape shape-top-left"></div>
+        <div class="brand-shape shape-top-right"></div>
+        <div class="brand-shape shape-bottom-left"></div>
+        <div class="brand-shape shape-bottom-right"></div>
+        <div class="brand-shape shape-center"></div>
+    </div>
+    
+    <header class="header">
+        <div class="logo">dazzify</div>
+    </header>
+    
     <div class="container">
-        <h1><%= title %></h1>
+        <h1 class="page-title"><%= title %></h1>
         <div class="questions-container">
             <% questions.forEach((question, index) => { %>
                 <div class="question-card" id="question-<%= question.key %>">
@@ -61,8 +409,8 @@
                 if (selectedBtn) selectedBtn.classList.add('answered');
                 if (questionCard) {
                     questionCard.classList.add('show-percent');
-                    buttons.forEach(btn => { btn.disabled = true; });
                     questionCard.classList.add('locked');
+                    buttons.forEach(btn => { btn.disabled = true; });
                 }
                 state.answeredQuestions.add(questionKey);
                 // Emit vote to server
@@ -71,6 +419,7 @@
                 updateContinueButton();
             } catch (error) {
                 alert('An error occurred while submitting your vote. Please try again.');
+                console.error(error);
             } finally {
                 state.isSubmitting = false;
             }
