@@ -174,6 +174,83 @@
             margin-bottom: 1.5rem;
             line-height: 1.4;
         }
+        .summary-stats {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.2rem;
+            background: rgba(75, 16, 141, 0.03);
+            padding: 1rem;
+            border-radius: 12px;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        .question-card.show-percent .summary-stats {
+            opacity: 1;
+            height: auto;
+            overflow: visible;
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .summary-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .summary-percent {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .summary-percent-bar-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .summary-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.7rem;
+            justify-content: flex-start;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            color: #666;
+        }
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .summary-percent-bars {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            transition: all 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .summary-percent-bar {
+            height: 100%;
+            transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-origin: left;
+            animation: fill-bar 1.5s ease-out forwards;
+        }
         .options-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -203,6 +280,11 @@
             box-shadow: 0 4px 15px rgba(75, 16, 141, 0.06);
             animation: pulse 1s infinite;
         }
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 15px rgba(75, 16, 141, 0.06); }
+            50% { box-shadow: 0 4px 20px rgba(75, 16, 141, 0.15); }
+            100% { box-shadow: 0 4px 15px rgba(75, 16, 141, 0.06); }
+        }
         .option-btn.answered {
             background: rgba(75, 16, 141, 0.03);
             color: var(--primary);
@@ -226,6 +308,53 @@
         }
         .percent-display {
             width: 100%;
+            position: relative;
+        }
+        .percent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.3rem;
+            width: 100%;
+        }
+        .percent-value-wrapper {
+            display: block;
+            min-width: 45px;
+            text-align: right;
+        }
+        .percent-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: inline-block;
+            position: relative;
+        }
+        .question-card.show-percent .percent-value {
+            opacity: 1;
+            font-weight: 700;
+            color: var(--primary);
+            animation: countUp 1.5s ease-out forwards;
+            font-size: 1.1rem;
+        }
+        .question-card.show-percent .option-btn.answered .percent-value {
+            background: -webkit-linear-gradient(var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+        .percent-label {
+            font-size: 0.7rem;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 600;
+        }
+        .question-card.show-percent .percent-label {
+            opacity: 0.9;
         }
         .percent-bar {
             background: #f0f0f0;
@@ -234,33 +363,70 @@
             width: 100%;
             overflow: hidden;
             margin-bottom: 0.5rem;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .percent-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.4) 50%, 
+                rgba(255,255,255,0) 100%);
+            opacity: 0;
+            z-index: 1;
+        }
+        .question-card.show-percent .percent-bar::after {
+            animation: shine 2s ease-in-out 0.7s;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
         }
         .percent-bar-fill {
             background: linear-gradient(90deg, var(--accent), var(--primary));
             height: 100%;
             border-radius: 20px;
-            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             min-width: 5px;
+            box-shadow: 0 0 5px rgba(75, 16, 141, 0.3);
+            position: relative;
+            transform-origin: left;
         }
         .question-card.show-percent .percent-bar-fill {
-            animation: fill-bar 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse-bar 1.5s infinite alternate 1.5s;
+        }
+        @keyframes pulse-bar {
+            0% { box-shadow: 0 0 5px rgba(75, 16, 141, 0.3); }
+            100% { box-shadow: 0 0 8px rgba(75, 16, 141, 0.5); }
         }
         @keyframes fill-bar {
-            from { width: 0%; }
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
         }
-        .percent-value {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            opacity: 0.85;
-            display: inline-block;
+        .percent-value::before {
+            display: none;
         }
-        .question-card.show-percent .percent-value {
-            opacity: 1;
-            font-weight: 700;
-            color: var(--primary);
-            animation: countUp 1.5s ease-out forwards;
+        .question-card.show-percent .option-btn.answered .percent-value {
+            background: -webkit-linear-gradient(var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+        .question-card.show-percent .option-btn.answered .percent-bar-fill {
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            box-shadow: 0 0 10px rgba(75, 16, 141, 0.4);
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
         }
         @keyframes countUp {
             0% { opacity: 0.5; }
@@ -290,9 +456,91 @@
             box-shadow: var(--shadow);
             animation: pulse-btn 1.5s infinite;
         }
+        @keyframes pulse-btn {
+            0% { box-shadow: 0 4px 15px rgba(75, 16, 141, 0.1); }
+            50% { box-shadow: 0 4px 20px rgba(75, 16, 141, 0.2); }
+            100% { box-shadow: 0 4px 15px rgba(75, 16, 141, 0.1); }
+        }
         .continue-btn:disabled {
             background: #b9b9b9;
             cursor: not-allowed;
+        }
+        
+        /* Download App Section */
+        .download-app-section {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow);
+            margin: 3rem auto;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        .download-content {
+            position: relative;
+            z-index: 2;
+        }
+        .download-content h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        .download-content p {
+            color: #444;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+        .download-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .download-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        .download-badge:hover {
+            transform: translateY(-5px);
+        }
+        .badge-img {
+            height: 54px;
+            border-radius: 0.5rem;
+        }
+        .download-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .download-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.07;
+        }
+        .shape-dl-1 {
+            bottom: -70px;
+            right: -70px;
+            width: 240px;
+            height: 240px;
+        }
+        .shape-dl-2 {
+            top: -60px;
+            left: -60px;
+            width: 180px;
+            height: 180px;
+            background: var(--primary);
+            opacity: 0.05;
         }
         
         /* Responsive Adjustments */
@@ -319,6 +567,24 @@
             .option-text {
                 margin-bottom: 1rem;
             }
+            .percent-value {
+                font-size: 0.9rem;
+                padding-left: 0;
+                display: inline-block;
+                position: relative;
+            }
+            .question-card.show-percent .percent-value {
+                font-size: 1rem;
+            }
+            .question-card.show-percent .option-btn.answered .percent-value {
+                font-size: 1.1rem;
+            }
+            .download-app-section {
+                padding: 2rem 1rem;
+            }
+            .download-content h2 {
+                font-size: 1.5rem;
+            }
         }
         @media (max-width: 480px) {
             .question-card {
@@ -339,11 +605,20 @@
                 margin-bottom: 0.3rem;
             }
             .percent-value {
-                font-size: 0.8rem;
+                font-size: 0.85rem;
+                display: inline-block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            .percent-label {
+                font-size: 0.65rem;
             }
             .continue-btn {
                 padding: 0.8rem 2rem;
                 font-size: 1rem;
+            }
+            .badge-img {
+                height: 45px;
             }
         }
     </style>
@@ -367,6 +642,41 @@
             <% questions.forEach((question, index) => { %>
                 <div class="question-card" id="question-<%= question.key %>">
                     <h2><%= question.text %></h2>
+                    <div class="summary-stats">
+                        <div class="summary-header">
+                            <div class="summary-title">Response Distribution</div>
+                            <div class="summary-percent">100%</div>
+                        </div>
+                        <div class="summary-percent-bar-container">
+                            <div class="summary-percent-bars">
+                                <% 
+                                let totalPercentage = 0;
+                                const percentColors = ['#4B108D', '#7923cb', '#9747ff', '#ba79ff', '#d2a6ff'];
+                                %>
+                                <% question.options.forEach((option, optIndex) => { 
+                                    const percent = percentages[question.key] ? percentages[question.key][optIndex] : 0;
+                                    totalPercentage += percent;
+                                    const color = percentColors[optIndex % percentColors.length];
+                                %>
+                                    <div class="summary-percent-bar" 
+                                         style="width: 0%; background-color: <%= color %>;" 
+                                         data-target-width="<%= percent %>%">
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <div class="summary-legend">
+                            <% question.options.forEach((option, optIndex) => { 
+                                const percent = percentages[question.key] ? percentages[question.key][optIndex] : 0;
+                                const color = percentColors[optIndex % percentColors.length];
+                            %>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background-color: <%= color %>;"></div>
+                                    <span><%= option.text.length > 15 ? option.text.substring(0, 15) + '...' : option.text %> (<span class="legend-percent" data-percent="<%= percent %>">0</span>%)</span>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
                     <div class="options-grid">
                         <% question.options.forEach((option, optIndex) => { %>
                             <button class="option-btn" 
@@ -374,12 +684,6 @@
                                     data-option-key="<%= option.key %>"
                                     onclick="vote('<%= question.key %>', '<%= option.key %>')">
                                 <span class="option-text"><%= option.text %></span>
-                                <div class="percent-display">
-                                    <div class="percent-bar">
-                                        <div class="percent-bar-fill" style="width: <%= percentages[question.key] ? percentages[question.key][optIndex] : 0 %>%"></div>
-                                    </div>
-                                    <span class="percent-value"><%= percentages[question.key] ? percentages[question.key][optIndex] : 0 %>%</span>
-                                </div>
                             </button>
                         <% }); %>
                     </div>
@@ -389,6 +693,26 @@
         <div class="navigation">
             <button class="continue-btn" onclick="continueToNext()" disabled>Continue</button>
         </div>
+
+        <!-- Download App Section -->
+        <section class="download-app-section">
+            <div class="download-bg">
+                <div class="download-shape shape-dl-1"></div>
+                <div class="download-shape shape-dl-2"></div>
+            </div>
+            <div class="download-content">
+                <h2>Get Dazzify on Your Phone</h2>
+                <p>Set up your event with only a few clicks!</p>
+                <div class="download-badges">
+                    <a href="https://play.google.com/store/apps/details?id=com.dazzify.app" target="_blank" class="download-badge">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="badge-img" />
+                    </a>
+                    <a href="https://apps.apple.com/eg/app/dazzify/id6670177355" target="_blank" class="download-badge">
+                        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" class="badge-img" />
+                    </a>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -412,17 +736,34 @@
                 buttons.forEach(btn => btn.classList.remove('answered'));
                 const selectedBtn = Array.from(buttons).find(btn => btn.getAttribute('data-option-key') === optionKey);
                 if (selectedBtn) selectedBtn.classList.add('answered');
+                
                 if (questionCard) {
-                    questionCard.classList.add('show-percent');
-                    questionCard.classList.add('locked');
-                    buttons.forEach(btn => { btn.disabled = true; });
-                    
-                    // Animate percentages
-                    const percentValues = questionCard.querySelectorAll('.percent-value');
-                    percentValues.forEach(percentEl => {
-                        const targetValue = parseFloat(percentEl.textContent);
-                        animateCounter(percentEl, 0, targetValue);
+                    // Reset summary bars
+                    const summaryBars = questionCard.querySelectorAll('.summary-percent-bar');
+                    summaryBars.forEach(bar => {
+                        bar.style.width = '0%';
                     });
+                    
+                    // Add a slight delay before starting animations
+                    setTimeout(() => {
+                        // Apply classes to show percentages
+                        questionCard.classList.add('show-percent');
+                        questionCard.classList.add('locked');
+                        buttons.forEach(btn => { btn.disabled = true; });
+                        
+                        // Animate summary bars
+                        summaryBars.forEach(bar => {
+                            const targetWidth = bar.getAttribute('data-target-width');
+                            bar.style.width = targetWidth;
+                        });
+                        
+                        // Animate percentages in legend
+                        const legendPercentages = questionCard.querySelectorAll('.legend-percent');
+                        legendPercentages.forEach(percentEl => {
+                            const targetValue = parseFloat(percentEl.getAttribute('data-percent'));
+                            animateCounter(percentEl, 0, targetValue);
+                        });
+                    }, 50);
                 }
                 state.answeredQuestions.add(questionKey);
                 // Emit vote to server
@@ -444,13 +785,28 @@
             function animate(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const progress = Math.min((timestamp - startTime) / duration, 1);
-                const currentValue = Math.floor(progress * (end - start) + start);
+                
+                // Easing function for smoother counting
+                const easedProgress = progress < 0.5 
+                    ? 4 * progress * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                    
+                const currentValue = Math.floor(easedProgress * (end - start) + start);
                 element.textContent = `${currentValue}%`;
                 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
                     element.textContent = `${end}%`;
+                    // Add a subtle bounce effect at the end
+                    element.animate([
+                        { transform: 'scale(1)' },
+                        { transform: 'scale(1.15)' },
+                        { transform: 'scale(1)' }
+                    ], {
+                        duration: 300,
+                        easing: 'ease-out'
+                    });
                 }
             }
             
