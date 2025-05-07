@@ -9,7 +9,22 @@ const employeeRoutes = require('./routes/employee');
 const pollSocket = require('./sockets/pollSocket');
 
 const app = express();
-const server = require('http').createServer(app);
+
+let server
+if (process.env.NODE_ENV === 'production') {
+    server = require('http').createServer(
+        {
+            key: fs.readFileSync(`/etc/letsencrypt/live/poll.${Config.API_DOMAIN}/privkey.pem`),
+            cert: fs.readFileSync(
+                `/etc/letsencrypt/live/poll.${Config.API_DOMAIN}/fullchain.pem`,
+            ),
+        },
+        app,
+    );
+} else {
+    server = require('http').createServer(app);
+}
+
 const io = require('socket.io')(server);
 
 connectDB();
@@ -32,7 +47,7 @@ app.use('/employee', employeeRoutes);
 
 pollSocket(io);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 }); 

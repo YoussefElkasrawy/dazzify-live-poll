@@ -1,5 +1,25 @@
 module.exports = [
   {
+      key: "gender",
+      text: "What is your gender?",
+      options: [
+          { key: "male", text: "Male" },
+          { key: "female", text: "Female" }
+      ]
+  },
+  {
+      key: "age_range",
+      text: "What is your age range?",
+      options: [
+          { key: "under_18", text: "Under 18" },
+          { key: "18_24", text: "18-24" },
+          { key: "25_34", text: "25-34" },
+          { key: "35_44", text: "35-44" },
+          { key: "45_54", text: "45-54" },
+          { key: "55_plus", text: "55+" }
+      ]
+  },
+  {
       key: "have_planned_event",
       text: "Have you ever planned an event (corporate or personal)?",
       options: [
