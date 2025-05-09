@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const voteSchema = new mongoose.Schema({
+    userId: { type: String, required: true, index: true },
     questionKey: { type: String, required: true, index: true },
     optionKey: { type: String, required: true },
     isEmployee: { type: Boolean, required: true, index: true },
