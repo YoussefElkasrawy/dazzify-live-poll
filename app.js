@@ -13,7 +13,7 @@ const app = express();
 
 let server
 if (process.env.NODE_ENV === 'production') {
-    server = require('http').createServer(
+    server = require('node:https').createServer(
         {
             key: fs.readFileSync(`/etc/letsencrypt/live/poll.${process.env.DOMAIN}/privkey.pem`),
             cert: fs.readFileSync(
